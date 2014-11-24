@@ -1,4 +1,4 @@
-package Nmea;
+package NaiveBayes;
 
 public class TrainnerExperience {
 	
