@@ -11,10 +11,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-/**
- * @author Angelo Pingo
- *
- */
 public class FileProcessT {
 
 	List<TreeMap<Integer, Integer>> listExpTrue;
@@ -24,6 +20,8 @@ public class FileProcessT {
 	int maxValues = 0;
 	Probabilidades prob = null;
 
+	float[] probabilidadesTotais = new float[2];
+
 	public int getNumColunas() {
 		return numColunas;
 	}
@@ -32,6 +30,36 @@ public class FileProcessT {
 
 	public FileProcessT(String filename) {
 		this.filename = filename;
+	}
+
+	public NaiveBayesFile readNaiveBayesFile() {
+
+		List<Data> data = new ArrayList<Data>();
+		FileReader file;
+		BufferedReader reader;
+		try {
+			
+			file = new FileReader(filename);
+			reader = new BufferedReader(file);
+			String line;
+			String[] words;
+
+			while ((line = reader.readLine()) != null) {
+				
+				Data lineData = new Data(line, true);
+				data.add(lineData);
+
+			}
+
+			reader.close();
+			file.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+		
+		return new NaiveBayesFile(data);
+		
 	}
 
 	public void readFile() {
@@ -49,18 +77,17 @@ public class FileProcessT {
 
 				words = line.split(",");
 				if (words[words.length - 1].trim().equals("1")) { // Caso a
-																	// saida
-																	// seja true
+					// saida
+					// seja true
 					this.numColunas = words.length - 1;
-					
+
 					for (int i = 0; i < words.length; i++) {
 						int value = Integer.parseInt(words[i].trim());
-						
+
 						if (maxValues<value){
 							maxValues = value;
-							System.out.println("MaxValue="+maxValues);
 						}
-						
+
 						if (listExpTrue.size() <= i) {
 							listExpTrue.add(i, new TreeMap<Integer, Integer>());
 							listExpTrue.get(i).put(value, new Integer(1));
@@ -78,7 +105,7 @@ public class FileProcessT {
 
 				} else {
 					for (int i = 0; i < words.length; i++) {
-						
+
 						int value = Integer.parseInt(words[i].trim());
 						if (maxValues<value) {
 							maxValues = value;
@@ -86,7 +113,7 @@ public class FileProcessT {
 
 						if (listExpFalse.size() <= i) {
 							listExpFalse
-									.add(i, new TreeMap<Integer, Integer>());
+							.add(i, new TreeMap<Integer, Integer>());
 							listExpFalse.get(i).put(
 									Integer.parseInt(words[i].trim()),
 									new Integer(1));
@@ -115,6 +142,7 @@ public class FileProcessT {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 	}
 
 	public void fillOddsTrue(List<TreeMap<Integer, Integer>> lista,
@@ -147,7 +175,7 @@ public class FileProcessT {
 			column++;
 		}
 	}
-	
+
 	public void fillTotalColumn(List<TreeMap<Integer, Integer>> lista, boolean btrue) {
 		int column = 0;
 		if (totalPorColuna==null) {
@@ -192,29 +220,42 @@ public class FileProcessT {
 		}
 	}
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
+	public void printMatrix() {
 
-		FileProcessT file = new FileProcessT("files/1-trn.data");
-		file.readFile();
-		file.prob = new Probabilidades(file.getNumColunas());
-		
-		System.out.println("#####  INPUT  #####");
-		System.out.println("TRUE");
-		file.printList(file.listExpTrue);
-		System.out.println("FALSE");
-		file.printList(file.listExpFalse);
-		file.fillTotalColumn(file.listExpTrue, true);
-		file.fillTotalColumn(file.listExpFalse, false);
+		System.out.println("Printing total por coluna: ");
 
-		System.out.println("#####  ODDS  #####");
-		System.out.println("TRUE");
-		file.fillOddsTrue(file.listExpTrue, file.prob);
-		file.prob.printProbabilidadesTrue();
-		System.out.println("FALSE");
-		file.fillOddsFalse(file.listExpFalse, file.prob);
-		file.prob.printProbabilidadesFalse();
+		if(totalPorColuna != null) {
+
+			for(int i = 0; i < totalPorColuna.length; i++) {
+				System.out.print("C" + i + ": ");
+				for(int j = 0; j < totalPorColuna[0].length - 1; j++) {
+					System.out.print(totalPorColuna[i][j] + " ");
+				}
+				System.out.println();
+			}
+
+		}
+
 	}
+
+	public void getProbsTotais() {
+
+		float numberOfFalses = totalPorColuna[0][0];
+		float numberOfTrues = totalPorColuna[1][0];
+
+		probabilidadesTotais[0] = (numberOfFalses / (numberOfFalses + numberOfTrues));
+		probabilidadesTotais[1] = (numberOfTrues / (numberOfFalses + numberOfTrues));
+
+	}
+
+	public void calcOdds(Probabilidades prob) {
+		this.fillTotalColumn(listExpTrue, true);
+		this.fillTotalColumn(listExpFalse, false);
+		this.fillOddsTrue(listExpTrue, prob);
+		this.fillOddsFalse(listExpFalse, prob);		
+	}
+
+	
+
+	
 }

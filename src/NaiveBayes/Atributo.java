@@ -2,9 +2,6 @@ package NaiveBayes;
 
 public class Atributo {
 
-	//numero de exp
-	private int number;
-	//contador
 	
 	private float probabilidade;
 	
@@ -13,16 +10,8 @@ public class Atributo {
 	}
 
 
-	public Atributo(int number) {
-		this.number = number;
-	}
-	
-	public int getNumber() {
-		return number;
-	}
-	
-	public void setNumber(int number) {
-		this.number = number;
+	public Atributo(float probabilidade) {
+		this.probabilidade = probabilidade;
 	}
 	
 	
