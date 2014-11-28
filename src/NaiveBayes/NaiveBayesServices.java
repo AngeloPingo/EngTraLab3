@@ -19,9 +19,9 @@ public class NaiveBayesServices {
 				}
 			} else {
 				if(result == data.getResult()) {
-					table.addOneFn();
-				} else {
 					table.addOneTn();
+				} else {
+					table.addOneFn();
 				}
 			}
 				
